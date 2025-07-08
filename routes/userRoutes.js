@@ -30,57 +30,8 @@ router.post('/signup', async (req, res) => {
     }
 });
 
-router.post('/login', async (req, res) => {
-    const { gmail, password } = req.body;
-
-    try {
-        const result = await pool.query('SELECT * FROM users WHERE gmail = $1', [gmail]);
-        const user = result.rows[0];
-
-        if (!user) {
-            return res.status(401).json({ message: 'Invalid email' });
-        }
-        if (user.password !== password) {
-            return res.status(401).json({ message: 'Invalid password' });
-        }
-
-        req.session.user = {
-            id: user.id,
-            email: user.gmail,
-            fullName: user.name,
-        };
-
-        req.session.save((err) => {
-            if (err) {
-                return res.status(500).json({ message: 'Session not saved' });
-            }
-
-            res.json({ message: 'Login successful', user });
-        });
-    } catch (err) {
-        res.status(500).send('Database error');
-    }
-});
-
-
-router.post('/logout', (req, res) => {
-    req.session.destroy((err) => {
-        if (err) {
-            return res.status(500).json({ message: 'Logout failed' });
-        }
-
-        res.clearCookie('connect.sid', {
-            path: '/',
-            httpOnly: true,
-            secure: false,
-            sameSite: 'lax'
-        });
-
-        res.json({ message: 'Logged out successfully' });
-    });
-});
-
 router.get('/users', requireLogin, async (req, res) => {
+    console.log('User request for session:', req.sessionID);
     try {
         const result = await pool.query('SELECT * FROM users');
         const users = result.rows;
@@ -92,7 +43,6 @@ router.get('/users', requireLogin, async (req, res) => {
         res.status(500).send('Database error');
     }
 });
-
 
 router.put('/update-password', requireLogin, async (req, res) => {
     const { gmail, oldPassword, newPassword } = req.body;
@@ -117,8 +67,6 @@ router.put('/update-password', requireLogin, async (req, res) => {
         res.status(500).send('Database error');
     }
 });
-
-
 
 router.delete('/users/:id', requireLogin, async (req, res) => {
     const userId = req.params.id;

@@ -1,10 +1,10 @@
 const createExpressApp = require('./createExpressApp');
 const app = createExpressApp();
 const PORT = process.env.PORT || 8000;
-const usersRouter = require('./routes/users');
+const routes = require('./routes');
 
-app.use('/api', usersRouter);
+app.use('/api', routes);
 
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`Server running on http://localhost:${PORT}`);
 });
