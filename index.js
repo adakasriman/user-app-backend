@@ -1,6 +1,6 @@
 const createExpressApp = require('./createExpressApp');
 const app = createExpressApp();
-const PORT = process.env.PORT || 8000;
+const PORT = process.env.PORT || 4000;
 const routes = require('./routes');
 
 app.use('/api', routes);
