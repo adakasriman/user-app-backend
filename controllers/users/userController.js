@@ -1,4 +1,4 @@
-const pool = require('../../config/db');
+const pool = require('../../config/sequelize');
 
  const getUsersList = async (req, res) => {
     console.log('User request for session:', req.sessionID);

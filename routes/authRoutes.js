@@ -4,7 +4,7 @@ const authController = require('../controllers/authController');
 const {signupValidationRules, loginValidationRules} = require('../validators/auth_validations/signupValidator');
 
 router.post('/signup', 
-    signupValidationRules, // here we can add multiple middlewares
+    signupValidationRules,
     authController.signup
 );
 

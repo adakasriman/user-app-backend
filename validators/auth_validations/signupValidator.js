@@ -6,10 +6,10 @@ const signupValidationRules = [
     .notEmpty().withMessage('Username is required')
     .isLength({ min: 3, max: 30 }).withMessage('Username must be between 3 and 30 characters'),
 
-  body('gmail')
+  body('email')
     .trim()
-    .notEmpty().withMessage('Gmail is required')
-    .isEmail().withMessage('Gmail must be valid')
+    .notEmpty().withMessage('Email is required')
+    .isEmail().withMessage('Email must be valid')
     .normalizeEmail(),
 
   body('password')
@@ -18,10 +18,10 @@ const signupValidationRules = [
 ];
 
 const loginValidationRules = [
-    body('gmail')
+    body('email')
       .trim()
-      .notEmpty().withMessage('Gmail is required')
-      .isEmail().withMessage('Gmail must be valid')
+      .notEmpty().withMessage('Email is required')
+      .isEmail().withMessage('Email must be valid')
       .normalizeEmail(),
 
     body('password')
@@ -29,10 +29,10 @@ const loginValidationRules = [
 ];
 
 const updatePasswordValidationRules = [
-    body('gmail')
+    body('email')
       .trim()
-      .notEmpty().withMessage('Gmail is required')
-      .isEmail().withMessage('Gmail must be valid')
+      .notEmpty().withMessage('Email is required')
+      .isEmail().withMessage('Email must be valid')
       .normalizeEmail(),
 
     body('oldPassword')

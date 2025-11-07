@@ -1,57 +1,62 @@
-// createExpressApp.js
 const express = require('express');
 const cors = require('cors');
 const session = require('express-session');
-const pgSession = require('connect-pg-simple')(session);
-const pool = require('./config/db');
 const morgan = require('morgan');
 const helmet = require('helmet');
-const xssClean = require('xss-clean');
+const dotenv = require('dotenv');
+const sequelize = require('./config/sequelize');
 const rateLimit = require('express-rate-limit');
-require('dotenv').config();
+const sessionStore = require('./config/sessionStore');
+
+dotenv.config();
 
 function createExpressApp() {
     const app = express();
 
-    // Middleware
-    app.use(cors({
-        origin: function (origin, callback) {
-            if (!origin || origin.startsWith('http://localhost')) {
-                callback(null, true);
-            } else {
-                callback(new Error('Not allowed by CORS'));
-            }
-        },
-        credentials: true
-    }));
+    // ✅ Allow your React frontend
+    app.use(
+        cors({
+            origin: ['http://localhost:5173'], 
+            credentials: true, // allow cookies & session headers
+            methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+            allowedHeaders: ['Content-Type', 'Authorization'],
+        })
+    );
 
+    // ✅ Basic security, logs, and JSON
+    app.use(helmet());
     app.use(morgan('dev'));
-    app.use(helmet()); // default security headers
-    // app.use(xssClean()); // prevent xss attacks
     app.use(express.json());
 
+    // ✅ Rate limiter
     const limiter = rateLimit({
-        windowMs: 15 * 60 * 1000,
-        max: 100,                 
-        message: 'Too many requests from this IP, try again later.'
+        windowMs: 15 * 60 * 1000, // 15 min
+        max: 100,
+        message: 'Too many requests from this IP, try again later.',
     });
     app.use(limiter);
 
-    app.use(session({
-        secret: process.env.JWT_SECRET,
-        resave: false,
-        saveUninitialized: false,
-        store: new pgSession({
-            pool: pool,
-            tableName: 'session',
-            errorLog: console.log
-        }),
-        cookie: {
-            httpOnly: true,
-            secure: false,
-            maxAge: 1000 * 60 * 60,
-        }
-    }));
+    // ✅ Express session setup
+    app.use(
+        session({
+            secret: process.env.SESSION_SECRET || 'mysecretkey',
+            resave: false,
+            saveUninitialized: false,
+            store: sessionStore,
+            cookie: {
+                httpOnly: true,
+                secure: false, // true only if using HTTPS
+                sameSite: 'lax', // RTK Query safe default
+                maxAge: 1000 * 60 * 60, // 1 hour
+            },
+        })
+    );
+
+    // ✅ Connect and sync database
+    sequelize
+        .sync()
+        .then(() => console.log('✅ Database synced successfully'))
+        .catch((err) => console.error('❌ DB sync error:', err));
 
     return app;
 }
