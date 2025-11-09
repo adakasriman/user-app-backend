@@ -13,4 +13,12 @@ class UserLoginDTO {
     }
 }
 
-module.exports = { UserSignupDTO, UserLoginDTO };
+class UserDataDTO {
+    constructor({ email, name, id }) {
+        this.email = email?.toLowerCase().trim();
+        this.id = id;
+        this.userName = name?.trim();
+    }
+}
+
+module.exports = { UserSignupDTO, UserLoginDTO, UserDataDTO };

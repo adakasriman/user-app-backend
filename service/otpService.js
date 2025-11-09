@@ -4,6 +4,8 @@ const otpGenerator = require('otp-generator');
 const jwt = require('jsonwebtoken');
 const { sendEmail } = require('../utils/mailer');
 const { saveOtp, getOtp, deleteOtp } = require('../repositories/otpRepository');
+const { findUserByEmail } = require('../repositories/userRepository');
+const { UserDataDTO } = require('../dtos/user/user.dto');
 
 const sendOtpService = async (otpRequestDto) => {
   const otp = otpGenerator.generate(6, {
@@ -32,8 +34,14 @@ const verifyOtpService = async (otpVerifyDto) => {
 
   // remove OTP after successful verification
   await deleteOtp(otpVerifyDto.email);
+  const user = await findUserByEmail(otpVerifyDto.email);
 
-  return { status: 200, message: 'OTP verified successfully', token };
+  return { 
+    status: 200,
+    message: 'OTP verified successfully',
+    token,
+    user: new UserDataDTO(user),
+  };
 };
 
 module.exports = { sendOtpService, verifyOtpService };
