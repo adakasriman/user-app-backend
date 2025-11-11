@@ -2,6 +2,8 @@
 const { validationResult } = require('express-validator');
 const { signupService, loginService } = require('../../service/auth');
 const { UserSignupDTO, UserLoginDTO } = require('../../dtos/user/user.dto');
+const { sendOtpService } = require('../../service/otpService');
+const { OtpRequestDTO } = require('../../dtos/user/otp.dto');
 
 // Signup
 const signup = async (req, res) => {
@@ -33,6 +35,8 @@ const login = async (req, res) => {
     try {
         const user = await loginService(new UserLoginDTO({ email, password }));
         req.session.user = user;
+        const otpDto = new OtpRequestDTO(req.body);
+        await sendOtpService(otpDto);
         res.status(200).json({ message: 'Login successful', user });
     } catch (err) {
         res.status(err.status || 500).json({ error: err.message || 'Internal server error' });
